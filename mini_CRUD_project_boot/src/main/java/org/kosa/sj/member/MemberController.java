@@ -2,8 +2,6 @@ package org.kosa.sj.member;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.kosa.sj.util.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
