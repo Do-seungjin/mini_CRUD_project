@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.kosa.sj.member.MemberDAO;
 import org.kosa.sj.member.MemberVO;
+import org.kosa.sj.page.Paging;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,7 +20,17 @@ public class BoardService {
 	public List<PostVO> getList() {
 		return boardDAO.findAll();
 	}
-
+	// 임시 
+	public List<PostVO> getHomeList(String boardNo, Paging paging){
+		int numberPerPage = paging.getNumPerPage();
+		int nowPage = paging.getNowPage();
+		return boardDAO.findBoardPost(boardNo,numberPerPage);
+	}
+	
+	public int getTotalBoardCount(String boardNo) {
+		return (int) boardDAO.getBoardCount(boardNo);
+	}
+	
 	public int getTotalDataCount() {
 		return (int) boardDAO.count();
 	}

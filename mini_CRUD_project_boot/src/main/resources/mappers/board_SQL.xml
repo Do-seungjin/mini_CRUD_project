@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.kosa.sj.board.BoardDAO">
+
+  <select id="getBoardType" resultType="org.kosa.sj.board.BoardTypeVO">
+    SELECT * 
+    FROM TB_BOARD_TYPE
+    ORDER BY board_no ASC
+  </select>
+
+  <select id="findBoardPost" resultType="org.kosa.sj.board.PostVO">
+    SELECT *
+    FROM TB_POST
+    WHERE board_no = #{boardNo}
+      AND IS_POST_DELETE = 'N'
+    ORDER BY POST_REG_DATE DESC
+    LIMIT #{numberPerPage}
+  </select>
+
+  <select id="getBoardCount" resultType="int">
+    SELECT COUNT(*)
+    FROM TB_POST
+    WHERE BOARD_NO = #{boardNo}
+    AND IS_POST_DELETE = 'N'
+  </select>
+	
+  <select id="list" parameterType="map" resultType="org.kosa.sj.board.PostVO">
+    SELECT p.*, u.user_name
+    FROM TB_POST p
+    JOIN TB_USER u ON p.user_no = u.user_no
+    <where>
+      p.IS_POST_DELETE = 'N'
+      AND u.exit_status = 'N'
+      <if test="boardNo != null">
+        AND p.board_no = #{boardNo}
+      </if>
+      <if test="searchValue != null and searchValue != ''">
+        AND p.POST_TITLE LIKE CONCAT('%', #{searchValue}, '%')
+      </if>
+    </where>
+    ORDER BY p.POST_REG_DATE DESC
+    LIMIT #{offset}, #{numPerPage}
+  </select>
+
+  <select id="getTotalCount" parameterType="map" resultType="int">
+    SELECT COUNT(*)
+    FROM TB_POST p
+    JOIN TB_USER u ON p.user_no = u.user_no
+    WHERE p.board_no = #{boardNo} AND p.IS_POST_DELETE = 'N' AND u.exit_status = 'N'
+    <if test="searchValue != null and searchValue != ''">
+      AND p.POST_TITLE LIKE CONCAT('%', #{searchValue}, '%')
+    </if>
+  </select>
+
+  <insert id="postRegist" parameterType="org.kosa.sj.board.PostVO">
+    INSERT INTO TB_POST (
+      post_no, user_no, board_no, post_title, post_content, comment_status, post_reg_date
+    ) VALUES (
+      #{postNo}, #{userNo}, #{boardNo}, #{postTitle}, #{postContent}, #{commentStatus}, NOW()
+    )
+  </insert>
+
+  <select id="getPost" parameterType="String" resultType="org.kosa.sj.board.PostVO">
+    SELECT p.*, u.user_name
+    FROM TB_POST p
+    JOIN TB_USER u ON p.user_no = u.user_no
+    WHERE p.POST_NO = #{postNo}
+  </select>
+
+  <update id="postUpdate" parameterType="org.kosa.sj.board.PostVO">
+    UPDATE TB_POST
+    SET POST_TITLE = #{postTitle},
+        POST_CONTENT = #{postContent},
+        POST_MOD_DATE = NOW()
+    WHERE POST_NO = #{postNo}
+  </update>
+
+  <update id="postDelete" parameterType="String">
+    UPDATE TB_POST
+    SET IS_POST_DELETE = 'Y',
+        POST_DELETE_DATE = NOW()
+    WHERE POST_NO = #{postNo}
+  </update>
+
+  <update id="addViewCnt" parameterType="String">
+    UPDATE TB_POST
+    SET VIEW_CNT = VIEW_CNT + 1
+    WHERE POST_NO = #{postNo}
+  </update>
+
+</mapper>
