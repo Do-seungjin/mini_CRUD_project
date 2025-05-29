@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.stereotype.Service;
+@Service
 public class MemberService {
 	@Autowired
 	private MemberDAO memberDAO;
@@ -31,8 +32,6 @@ public class MemberService {
 	public Map<String, Object> login(String userid, String passwd) {
 		Map<String, Object> map = new HashMap<String, Object>();
 		MemberVO member = memberDAO.getMember(userid);
-		int failCnt = memberDAO.getFailCnt(userid);
-
 		if (member == null) {
 			map.put("res_code", "400");
 			map.put("res_msg", "존재하는 회원정보가 없습니다.");

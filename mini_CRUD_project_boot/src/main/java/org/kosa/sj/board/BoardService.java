@@ -16,6 +16,14 @@ public class BoardService {
 	@Autowired
 	private MemberDAO memberDAO;
 
+	public List<PostVO> getList() {
+		return boardDAO.findAll();
+	}
+
+	public int getTotalDataCount() {
+		return (int) boardDAO.count();
+	}
+
 	public List<BoardTypeVO> getBoardType() {
 		List<BoardTypeVO> result = boardDAO.getBoardType();
 		return result;

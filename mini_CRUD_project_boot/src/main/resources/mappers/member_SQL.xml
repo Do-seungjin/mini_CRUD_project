@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.kosa.sj.member.MemberDAO">
+
+  <insert id="register">
+    INSERT INTO TB_USER (
+      user_id, user_pwd, user_name, user_birth, user_phone,
+      user_zipcode, user_addr, user_detail_addr, user_reg_date
+    ) 
+    VALUES (
+      #{userId}, #{userPwd}, #{userName}, #{userBirth}, #{userPhone},
+      #{userZipcode}, #{userAddr}, #{userDetailAddr}, NOW()
+    )
+  </insert>
+
+  <select id="getMember" parameterType="String" resultType="org.kosa.sj.member.MemberVO">
+    SELECT * FROM TB_USER WHERE USER_ID = #{userid}
+  </select>
+
+  <update id="setLoginTime" parameterType="String">
+    UPDATE TB_USER SET login_time = NOW() WHERE USER_ID = #{userId}
+  </update>
+
+  <update id="update">
+    UPDATE TB_USER SET 
+      user_name = #{userName},
+      user_birth = #{userBirth},
+      user_phone = #{userPhone},
+      user_zipcode = #{userZipcode},
+      user_addr = #{userAddr},
+      user_detail_addr = #{userDetailAddr}
+    WHERE USER_ID = #{userId}
+  </update>
+
+  <insert id="history">
+    INSERT INTO TB_USER_EDIT_RECORD (
+      user_no, edit_pwd, edit_name, edit_phone, edit_birth,
+      edit_zipcode, edit_addr, edit_detail_addr, edit_reg_date,
+      edit_exit_status, edit_exit_date, edit_account_status, 
+      edit_mod_date, is_manager
+    ) 
+    VALUES (
+      #{userNo}, #{userPwd}, #{userName}, #{userPhone}, #{userBirth},
+      #{userZipcode}, #{userAddr}, #{userDetailAddr}, #{userRegDate},
+      #{exitStatus}, #{exitDate, jdbcType=DATE}, #{accountStatus},
+      NOW(), #{isManager}
+    )
+  </insert>
+
+  <update id="delete" parameterType="String">
+    UPDATE TB_USER 
+    SET exit_status = 'Y', exit_date = NOW() 
+    WHERE USER_ID = #{userId}
+  </update>
+
+  <select id="list" resultType="org.kosa.sj.member.MemberVO">
+    SELECT * FROM TB_USER
+    WHERE exit_status = 'N'
+    <if test="searchValue != null and searchValue != ''">
+      AND user_name LIKE CONCAT('%', #{searchValue}, '%')
+    </if>
+    ORDER BY user_reg_date DESC
+    LIMIT #{start}, #{end}
+  </select>
+
+  <select id="getTotalCount" resultType="int">
+    SELECT COUNT(*) FROM TB_USER
+    WHERE exit_status = 'N'
+    <if test="searchValue != null and searchValue != ''">
+      AND user_name LIKE CONCAT('%', #{searchValue}, '%')
+    </if>
+  </select>
+
+  <update id="addFailCnt" parameterType="String">
+    UPDATE TB_USER
+    SET FAIL_CNT = FAIL_CNT + 1
+    WHERE USER_ID = #{userId}
+  </update>
+
+  <select id="getFailCnt" resultType="int">
+    SELECT FAIL_CNT FROM TB_USER WHERE USER_ID = #{userId}
+  </select>
+
+  <update id="changeLoginStatus" parameterType="String">
+    UPDATE TB_USER
+    SET ACCOUNT_STATUS = 'Y'
+    WHERE USER_ID = #{userId}
+  </update>
+
+  <update id="resetFailCnt" parameterType="String">
+    UPDATE TB_USER
+    SET FAIL_CNT = 0
+    WHERE USER_ID = #{userId}
+  </update>
+
+  <update id="resetStatus" parameterType="String">
+    UPDATE TB_USER
+    SET ACCOUNT_STATUS = 'N'
+    WHERE USER_ID = #{userId}
+  </update>
+
+  <update id="grantManager" parameterType="String">
+    UPDATE TB_USER
+    SET IS_MANAGER = 'Y'
+    WHERE USER_ID = #{userId}
+  </update>
+
+  <update id="revokeManager" parameterType="String">
+    UPDATE TB_USER
+    SET IS_MANAGER = 'N'
+    WHERE USER_ID = #{userId}
+  </update>
+
+  <select id="getMemberByNo" parameterType="String" resultType="org.kosa.sj.member.MemberVO">
+    SELECT * FROM TB_USER WHERE USER_NO = #{userNo}
+  </select>
+
+</mapper>

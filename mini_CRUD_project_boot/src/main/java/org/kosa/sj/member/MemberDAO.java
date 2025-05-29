@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface MemberDAO {
   public int register(MemberVO member);
-  public MemberVO getMember(String userid);
+  public MemberVO getMember(@Param("userid") String userid);
   public MemberVO getMemberByNo(String userno);
   public void setLoginTime(String userid);
   public int update(MemberVO member);

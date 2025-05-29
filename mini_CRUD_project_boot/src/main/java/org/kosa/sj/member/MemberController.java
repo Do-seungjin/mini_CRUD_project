@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +23,7 @@ public class MemberController {
 	MemberService memberService;
 
 	// 회원가입
-	@PostMapping("register")
+	@PostMapping("/register")
 	public Map<String, Object> register(@RequestBody MemberVO member) throws Exception {
 		Map<String, Object> map = new HashMap<>();
 		if (member == null) {
@@ -41,7 +43,7 @@ public class MemberController {
 	}
 
 	// 아이디 중복 검사
-	@PostMapping("isExistUserId")
+	@PostMapping("/isExistUserId")
 	public Map<String, Object> isExistUserId(@RequestBody MemberVO member) {
 		Map<String, Object> map = new HashMap<>();
 		map.put("existUserId", memberService.getMemberVO(member.getUserId()) != null);
@@ -50,31 +52,37 @@ public class MemberController {
 
 	// 로그인
 	@PostMapping("/login")
-	public Map<String, Object> login(HttpSession session, @RequestBody MemberVO member) {
-		Map<String, Object> map = new HashMap<>();
-		if (member.getUserId() == null || member.getUserId().isEmpty() || member.getUserPwd() == null
-				|| member.getUserPwd().isEmpty()) {
-			map.put("res_code", "400");
-			map.put("res_msg", "아이디 또는 비밀번호를 입력해주세요");
-			return map;
+	public ResponseEntity<Map<String, Object>> login(HttpSession session, @RequestBody MemberVO member) {
+		if (member.getUserId() == null || member.getUserId().isEmpty() ||
+		    member.getUserPwd() == null || member.getUserPwd().isEmpty()) {
+			return ResponseEntity.badRequest().body(
+				Map.of("res_code", "400", "res_msg", "아이디 또는 비밀번호를 입력해주세요")
+			);
 		}
-		map = memberService.login(member.getUserId(), member.getUserPwd());
+
+		Map<String, Object> map = memberService.login(member.getUserId(), member.getUserPwd());
+
 		if ("200".equals(map.get("res_code"))) {
 			MemberVO loginMemberVO = memberService.getMemberVO(member.getUserId());
 			session.setAttribute("member", loginMemberVO);
+			return ResponseEntity.ok(map);
+		} else {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+				    .body(Map.of("res_code", "401", "res_msg", "아이디 또는 비밀번호가 일치하지 않습니다."));
+
 		}
-		return map;
 	}
 
+
 	// 로그아웃
-	@GetMapping("logout")
+	@GetMapping("/logout")
 	public String logout(HttpSession session) {
 		session.invalidate();
 		return "redirect:/";
 	}
 
 	// 수정 & 수정 이력 남기기
-	@PostMapping("update")
+	@PostMapping("/update")
 	public Map<String, Object> update(HttpSession session, @RequestBody MemberVO member) throws Exception {
 		Map<String, Object> map = new HashMap<>();
 		int result = memberService.update(member);
@@ -110,7 +118,7 @@ public class MemberController {
 	}
 
 	// 사용자 로그인 잠금 해제
-	@PostMapping("resetStatus")
+	@PostMapping("/resetStatus")
 	public Map<String, Object> resetStatus(@RequestBody Map<String, String> param) {
 		Map<String, Object> map = new HashMap<>();
 		int result = memberService.resetStatus(param.get("userid"));
@@ -125,7 +133,7 @@ public class MemberController {
 	}
 
 	// 사용자 관리자 권한 부여
-	@PostMapping("grantManager")
+	@PostMapping("/grantManager")
 	public Map<String, Object> grantManager(@RequestBody Map<String, String> param) {
 		Map<String, Object> map = new HashMap<>();
 		int result = memberService.grantManager(param.get("userid"));
@@ -140,7 +148,7 @@ public class MemberController {
 	}
 
 	// 사용자 관리자 권한 해제
-	@PostMapping("revokeManager")
+	@PostMapping("/revokeManager")
 	public Map<String, Object> revokeManager(@RequestBody Map<String, String> param) {
 		Map<String, Object> map = new HashMap<>();
 		int result = memberService.revokeManager(param.get("userid"));
