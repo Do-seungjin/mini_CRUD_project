@@ -55,18 +55,20 @@
     WHERE USER_ID = #{userId}
   </update>
 
-  <select id="list" resultType="org.kosa.sj.member.MemberVO">
-    SELECT * FROM TB_USER
-    WHERE exit_status = 'N'
-    <if test="searchValue != null and searchValue != ''">
-      AND user_name LIKE CONCAT('%', #{searchValue}, '%')
-    </if>
-    ORDER BY user_reg_date DESC
-    LIMIT #{start}, #{end}
-  </select>
+	<select id="list" resultType="org.kosa.sj.member.MemberVO">
+	  SELECT * 
+	  FROM TB_USER
+	  WHERE exit_status = 'N'
+	  <if test="searchValue != null and searchValue != ''">
+	    AND user_name LIKE CONCAT('%', #{searchValue}, '%')
+	  </if>
+	  ORDER BY user_reg_date DESC
+	  LIMIT #{limitPageNo}, #{numPerPage}
+	</select>
 
   <select id="getTotalCount" resultType="int">
-    SELECT COUNT(*) FROM TB_USER
+    SELECT COUNT(*) 
+    FROM TB_USER
     WHERE exit_status = 'N'
     <if test="searchValue != null and searchValue != ''">
       AND user_name LIKE CONCAT('%', #{searchValue}, '%')

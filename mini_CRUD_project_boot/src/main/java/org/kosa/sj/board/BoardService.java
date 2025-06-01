@@ -17,22 +17,17 @@ public class BoardService {
 	@Autowired
 	private MemberDAO memberDAO;
 
-	public List<PostVO> getList() {
-		return boardDAO.findAll();
+	public List<PostVO> getList(String boardno, Paging paging, String searchValue) {
+		return boardDAO.findBoardPost(boardno, paging.getLimitPageNo(), paging.getNumPerPage(), searchValue);
 	}
-	// 임시 
+
 	public List<PostVO> getHomeList(String boardNo, Paging paging){
 		int numberPerPage = paging.getNumPerPage();
-		int nowPage = paging.getNowPage();
-		return boardDAO.findBoardPost(boardNo,numberPerPage);
+		return boardDAO.findHomeBoardPost(boardNo,numberPerPage);
 	}
 	
-	public int getTotalBoardCount(String boardNo) {
-		return (int) boardDAO.getBoardCount(boardNo);
-	}
-	
-	public int getTotalDataCount() {
-		return (int) boardDAO.count();
+	public int getTotalBoardCount(String boardNo, String searchValue) {
+		return (int) boardDAO.getBoardCount(boardNo, searchValue);
 	}
 
 	public List<BoardTypeVO> getBoardType() {

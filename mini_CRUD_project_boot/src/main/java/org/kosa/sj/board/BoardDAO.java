@@ -8,10 +8,15 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface BoardDAO {
-	  public List<PostVO> findAll();
-	  public List<PostVO> findBoardPost(@Param("boardNo") String boardNo,
+	public List<PostVO> findBoardPost(
+		    @Param("boardNo") String boardNo,
+		    @Param("limitPageNo") int limitPageNo,
+		    @Param("numPerPage") int numPerPage,
+		    @Param("searchValue") String searchValue);
+	  public List<PostVO> findHomeBoardPost(@Param("boardNo") String boardNo,
               @Param("numberPerPage") int numberPerPage);
-	  public int getBoardCount(String BoardNo);
+	  public int getBoardCount(@Param("boardNo") String BoardNo,
+			  @Param("searchValue") String searchValue);
 	  public int getTotalCount(Map<String, Object> map);
 	  public List<BoardTypeVO> getBoardType();
 	  public int postRegist(PostVO post);

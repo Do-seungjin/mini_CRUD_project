@@ -11,20 +11,47 @@
     ORDER BY board_no ASC
   </select>
 
-  <select id="findBoardPost" resultType="org.kosa.sj.board.PostVO">
-    SELECT *
-    FROM TB_POST
+  <select id="findBoardPost" parameterType="map" resultType="PostVO">
+    SELECT p.*, u.user_name
+    FROM TB_POST p
+    JOIN TB_USER u ON p.user_no = u.user_no
+    <where>
+      p.IS_POST_DELETE = 'N'
+      AND u.exit_status = 'N'
+      <if test="boardNo != null">
+        AND p.board_no = #{boardNo}
+      </if>
+      <if test="searchValue != null and searchValue != ''">
+        AND p.POST_TITLE LIKE CONCAT('%', #{searchValue}, '%')
+      </if>
+    </where>
+    ORDER BY p.POST_REG_DATE DESC
+    LIMIT #{limitPageNo}, #{numPerPage}
+  </select>
+
+  <select id="findHomeBoardPost" resultType="org.kosa.sj.board.PostVO">
+    SELECT p.*, u.user_name
+    FROM TB_POST p
+    JOIN TB_USER u ON p.user_no = u.user_no
     WHERE board_no = #{boardNo}
-      AND IS_POST_DELETE = 'N'
+    AND IS_POST_DELETE = 'N'
+    AND u.exit_status = 'N'
     ORDER BY POST_REG_DATE DESC
     LIMIT #{numberPerPage}
   </select>
-
+  
   <select id="getBoardCount" resultType="int">
     SELECT COUNT(*)
-    FROM TB_POST
-    WHERE BOARD_NO = #{boardNo}
-    AND IS_POST_DELETE = 'N'
+	  FROM TB_POST p
+	  JOIN TB_USER u ON p.user_no = u.user_no
+	  <where>
+    	p.board_no = #{boardNo}
+    	AND p.is_post_delete = 'N'
+    	AND u.exit_status = 'N'
+    	<if test="searchValue != null and searchValue != ''">
+      	AND p.post_title LIKE CONCAT('%', #{searchValue}, '%')
+    	</if>
+  	</where>
   </select>
 	
   <select id="list" parameterType="map" resultType="org.kosa.sj.board.PostVO">

@@ -1,23 +1,24 @@
 package org.kosa.sj.member;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.kosa.sj.page.Paging;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 @Service
 public class MemberService {
 	@Autowired
 	private MemberDAO memberDAO;
 
-	public void list(int pageNO, int size, String searchValue) {
-		Map<String, Object> map = new HashMap<String, Object>();
-
-		map.put("start", (pageNO - 1) * size + 1);
-		map.put("list", "member");
-		map.put("end", pageNO * size);
-		map.put("searchValue", searchValue);
-
+	public List<MemberVO> list(Paging paging, String searchValue) {
+		return memberDAO.list(paging.getLimitPageNo(), paging.getNumPerPage(),searchValue);
+	}
+	
+	public int getTotalMemberCount(String searchValue) {
+		return (int) memberDAO.getTotalCount(searchValue);
 	}
 
 	public int register(MemberVO member) {
@@ -92,14 +93,15 @@ public class MemberService {
 
 	}
 
+	@Transactional
 	public int resetStatus(String userid) {
-		int result = 0;
-		MemberVO memberDB = memberDAO.getMember(userid);
-		if (memberDB == null) {
-			return result;
-		}
-		return memberDAO.resetStatus(userid);
+	    MemberVO memberDB = memberDAO.getMember(userid);
+	    if (memberDB == null) return 0;
 
+	    int cnt1 = memberDAO.resetFailCnt(userid);
+	    int cnt2 = memberDAO.resetStatus(userid);
+
+	    return (cnt1 > 0 && cnt2 > 0) ? 1 : 0;
 	}
 
 	public int grantManager(String userid) {

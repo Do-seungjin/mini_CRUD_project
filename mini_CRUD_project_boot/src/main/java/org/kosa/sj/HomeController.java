@@ -1,6 +1,5 @@
 package org.kosa.sj;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -36,7 +35,7 @@ public class HomeController {
 			// 게시글 조회
 			List<PostVO> posts = boardService.getHomeList(boardNo, paging);
 
-			int total = boardService.getTotalBoardCount(boardNo);
+			int total = boardService.getTotalBoardCount(boardNo,"");
 			paging.setTotalData(total);
 			paging.calcPaging();
 

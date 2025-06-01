@@ -26,21 +26,22 @@ public class BoardController {
 	@Autowired
 	private BoardService boardService;
 
-	// 게시물 목록 화면 이동
-	@GetMapping("/postlist")
-	public ResponseEntity<Map<String, Object>> list(@RequestParam(value = "page", defaultValue = "1") int page) {
+	// 게시물 목록 조회
+	@GetMapping("/postlist/{boardno}")
+	public ResponseEntity<Map<String, Object>> list(@PathVariable String boardno,
+			@RequestParam(value = "page", defaultValue = "1") int page,
+			@RequestParam(value = "size", defaultValue = "10") int size,
+			@RequestParam(value = "searchValue", required = false) String searchValue) {
+
 		Paging paging = new Paging();
 		paging.setNowPage(page);
-		paging.setTotalData(boardService.getTotalDataCount());
-		paging.calcPaging(); // limitPageNo, totalPage 등 계산
+		paging.setNumPerPage(size);
+		paging.setTotalData(boardService.getTotalBoardCount(boardno, searchValue));
+		paging.calcPaging();
 
-		List<PostVO> boardList = boardService.getList();
-
-		return ResponseEntity.ok(Map.of(
-				"res_code", "200",
-				"res_msg", "게시물 목록 조회 성공",
-				"boardList", boardList,
-				"paging", paging));
+		List<PostVO> boardList = boardService.getList(boardno, paging, searchValue);
+		return ResponseEntity
+				.ok(Map.of("res_code", "200", "res_msg", "게시물 목록 조회 성공", "boardList", boardList, "paging", paging));
 	}
 
 	// 게시물 상세 조회
@@ -98,9 +99,9 @@ public class BoardController {
 	}
 
 	// 게시물 삭제
-	@DeleteMapping("/postDelete")
-	public ResponseEntity<Map<String, Object>> delete(@RequestBody Map<String, String> param) {
-		int result = boardService.delete(param.get("postNo"));
+	@DeleteMapping("/postDelete/{postNo}")
+	public ResponseEntity<Map<String, Object>> delete(@PathVariable String postNo) {
+		int result = boardService.delete(postNo);
 		if (result == 0) {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body(Map.of("res_code", "400", "res_msg", "게시물 삭제 중 오류가 발생하였습니다."));
@@ -111,7 +112,27 @@ public class BoardController {
 	// 작성자 게시물 삭제 비밀번호
 	@DeleteMapping("/userPostDelete")
 	public ResponseEntity<Map<String, Object>> userDelete(@RequestBody Map<String, String> param) {
-		Map<String, Object> result = boardService.userDelete(param.get("postno"), param.get("userpwd"));
-		return ResponseEntity.ok(result);
+		String postNo = param.get("postno");
+		String userPwd = param.get("userpwd");
+
+		Map<String, Object> response = new HashMap<>();
+
+		if (postNo == null || userPwd == null) {
+			response.put("res_code", "400");
+			response.put("res_msg", "필수 정보가 누락되었습니다.");
+			return ResponseEntity.badRequest().body(response);
+		}
+
+		// 실제 삭제 로직 호출
+		Map<String, Object> result = boardService.userDelete(postNo, userPwd);
+
+		// boardService.userDelete()에서 실패 시에도 응답을 200으로 내려줄 경우 대비
+		String code = (String) result.get("res_code");
+		if ("200".equals(code)) {
+			return ResponseEntity.ok(result);
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result);
+		}
 	}
+
 }

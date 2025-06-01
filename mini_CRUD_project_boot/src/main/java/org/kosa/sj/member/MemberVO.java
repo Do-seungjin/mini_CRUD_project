@@ -2,6 +2,8 @@ package org.kosa.sj.member;
 
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,6 +18,7 @@ public class MemberVO {
 	private String userId;
 	private String userPwd;
 	private String userName;
+	@JsonFormat(pattern = "yyyy-MM-dd")
 	private Date userBirth;
 	private String userPhone;
 	private String userZipcode;
