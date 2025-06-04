@@ -76,7 +76,9 @@
     SELECT COUNT(*)
     FROM TB_POST p
     JOIN TB_USER u ON p.user_no = u.user_no
-    WHERE p.board_no = #{boardNo} AND p.IS_POST_DELETE = 'N' AND u.exit_status = 'N'
+    WHERE p.board_no = #{boardNo} 
+    AND p.IS_POST_DELETE = 'N' 
+    AND u.exit_status = 'N'
     <if test="searchValue != null and searchValue != ''">
       AND p.POST_TITLE LIKE CONCAT('%', #{searchValue}, '%')
     </if>
